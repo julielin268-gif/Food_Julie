@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Foodie Map | 城市美味地圖導覽</title>
+  <style>
+    :root {
+      --bg-color: #141113;
+      --surface-color: #1e181c;
+      --surface-card: #282025;
+      --surface-hover: #342a30;
+      --primary-color: #d35400;
+      --primary-hover: #e67e22;
+      --primary-light: #f39c12;
+      --text-main: #f5f2f4;
+      --text-muted: #b3a7b0;
+      --border-color: #3e2e37;
+      --max-width: 1100px;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: var(--text-main);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-outline:hover {
+      background-color: var(--surface-hover);
+      border-color: var(--primary-light);
+    }
+
+    header {
+      background-color: rgba(20, 17, 19, 0.95);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--border-color);
+      transition: transform 0.3s ease;
+    }
+
+    header.nav-hidden {
+      transform: translateY(-100%);
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 70px;
+    }
+
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .logo span {
+      color: var(--primary-light);
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 2rem;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--text-main);
+    }
+
+    .nav-links a.active {
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 4px;
+    }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: space-around;
+      width: 30px;
+      height: 24px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      z-index: 101;
+    }
+
+    .hamburger span {
+      width: 100%;
+      height: 2px;
+      background-color: var(--text-main);
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .hamburger.active span:nth-child(1) {
+      transform: translateY(8px) rotate(45deg);
+    }
+
+    .hamburger.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .hamburger.active span:nth-child(3) {
+      transform: translateY(-8px) rotate(-45deg);
+    }
+
+    main section {
+      padding: 5rem 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 3rem;
+      color: var(--text-main);
+      position: relative;
+    }
+
+    .section-title::after {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 3px;
+      background-color: var(--primary-color);
+      margin: 0.75rem auto 0;
+      border-radius: 2px;
+    }
+
+    .hero {
+      padding: 6rem 0 5rem;
+      text-align: center;
+      background: radial-gradient(circle at 50% 20%, #4a2108 0%, var(--bg-color) 70%);
+    }
+
+    .hero-content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .kicker {
+      display: inline-block;
+      padding: 0.35rem 1rem;
+      background-color: rgba(211, 84, 0, 0.2);
+      border: 1px solid var(--border-color);
+      border-radius: 50px;
+      color: var(--primary-light);
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-size: 2.75rem;
+      line-height: 1.25;
+      margin-bottom: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      margin-bottom: 2.25rem;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+
+    .feature-card {
+      background-color: var(--surface-card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .feature-card:hover {
+      border-color: var(--primary-light);
+      transform: translateY(-2px);
+    }
+
+    .feature-image {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      background-color: var(--surface-color);
+    }
+
+    .feature-content {
+      padding: 1.75rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1.35rem;
+      margin-bottom: 1rem;
+      color: var(--text-main);
+    }
+
+    .feature-card p {
+      color: var(--text-muted);
+      font-size: 0.975rem;
+      line-height: 1.6;
+    }
+
+    .faq-container {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .faq-item {
+      background-color: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.5rem 1.75rem;
+    }
+
+    .faq-item h3 {
+      font-size: 1.15rem;
+      color: var(--primary-light);
+      margin-bottom: 0.75rem;
+    }
+
+    .faq-item p {
+      color: var(--text-muted);
+      font-size: 0.975rem;
+      line-height: 1.6;
+    }
+
+    .contact-section {
+      background-color: var(--surface-color);
+      border-bottom: none;
+    }
+
+    .contact-card {
+      background: linear-gradient(135deg, var(--surface-card) 0%, #341a08 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 3.5rem 2rem;
+      text-align: center;
+      max-width: 850px;
+      margin: 0 auto;
+    }
+
+    .contact-card h2 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .contact-card p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+
+    .contact-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    footer {
+      background-color: #0d0a0c;
+      padding: 3rem 0;
+      margin-top: auto;
+      border-top: 1px solid var(--border-color);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2rem;
+      }
+
+      .hamburger {
+        display: flex;
+      }
+
+      .nav-links {
+        position: absolute;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        background-color: rgba(20, 17, 19, 0.98);
+        border-bottom: 1px solid var(--border-color);
+        flex-direction: column;
+        gap: 0;
+        padding: 0.5rem 0;
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease-in-out;
+      }
+
+      .nav-links.nav-active {
+        max-height: 300px;
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .nav-links li {
+        width: 100%;
+        text-align: center;
+      }
+
+      .nav-links a {
+        display: block;
+        padding: 0.85rem 0;
+        width: 100%;
+      }
+
+      .nav-links a.active {
+        border-bottom: none;
+        color: var(--primary-light);
+        background-color: rgba(211, 84, 0, 0.15);
+      }
+
+      .hero-actions, .contact-actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        text-align: center;
+      }
+
+      .footer-content {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header id="site-header">
+    <div class="container">
+      <nav>
+        <a href="index.html" class="logo">
+          Foodie <span>Map</span>
+        </a>
+
+        <button class="hamburger" id="hamburger" aria-label="開啟選單" aria-expanded="false">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <ul class="nav-links" id="nav-links">
+          <li><a href="index.html" class="active">首頁</a></li>
+          <li><a href="courses.html">美食地圖</a></li>
+          <li><a href="contact.html">推薦私房美食</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="hero-content">
+          <div class="kicker" id="hero-kicker">載入中...</div>
+          <h1 id="hero-title">載入中...</h1>
+          <p id="hero-subtitle">載入中...</p>
+          <div class="hero-actions">
+            <a href="courses.html" class="btn btn-primary" id="hero-cta">探索精選美食</a>
+            <a href="contact.html" class="btn btn-outline">推薦私房美食</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="features">
+      <div class="container">
+        <h2 class="section-title" id="features-title">美食地圖核心特色</h2>
+        <div class="features-grid" id="features-container"></div>
+      </div>
+    </section>
+
+    <section id="faq">
+      <div class="container">
+        <h2 class="section-title" id="faq-title">食客常見問題</h2>
+        <div class="faq-container" id="faq-container"></div>
+      </div>
+    </section>
+
+    <section class="contact-section">
+      <div class="container">
+        <div class="contact-card">
+          <h2 id="contact-title">有口袋名單想跟我們分享？</h2>
+          <p id="contact-description">無論是你家巷口厲害的小吃攤，或是新開幕令人驚豔的甜點店，都歡迎推薦給我們！</p>
+          <div class="contact-actions">
+            <a href="contact.html" class="btn btn-primary">推薦私房美味</a>
+            <a href="courses.html" class="btn btn-outline">查看美食指南</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <p id="footer-copyright">© 2026 美食地圖 Foodie Map</p>
+        <p>Foodie Map | 城市美食地圖導覽</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const header = document.getElementById('site-header');
+      let lastScrollY = window.scrollY;
+
+      window.addEventListener('scroll', function () {
+        const currentScrollY = window.scrollY;
+        if (currentScrollY <= 50) {
+          header.classList.remove('nav-hidden');
+        } else if (currentScrollY > lastScrollY) {
+          header.classList.add('nav-hidden');
+        } else {
+          header.classList.remove('nav-hidden');
+        }
+        lastScrollY = currentScrollY;
+      });
+
+      const hamburger = document.getElementById('hamburger');
+      const navLinks = document.getElementById('nav-links');
+
+      hamburger.addEventListener('click', function () {
+        const isOpen = navLinks.classList.toggle('nav-active');
+        hamburger.classList.toggle('active', isOpen);
+        hamburger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+
+      fetch('website-content.json')
+        .then(response => response.json())
+        .then(data => renderContent(data))
+        .catch(() => renderFallbackContent());
+
+      function renderContent(data) {
+        if (data.hero) {
+          document.getElementById('hero-kicker').textContent = data.hero.kicker || "";
+          document.getElementById('hero-title').textContent = data.hero.title || "";
+          document.getElementById('hero-subtitle').textContent = data.hero.subtitle || "";
+          if (data.hero.cta) document.getElementById('hero-cta').textContent = data.hero.cta;
+        }
+
+        if (data.featuresTitle) document.getElementById('features-title').textContent = data.featuresTitle;
+
+        if (Array.isArray(data.features)) {
+          const container = document.getElementById('features-container');
+          container.innerHTML = '';
+          data.features.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'feature-card';
+            card.innerHTML = `
+              ${item.imageUrl ? `<img class="feature-image" src="${escapeHTML(item.imageUrl)}" alt="${escapeHTML(item.imageAlt || item.title)}">` : ''}
+              <div class="feature-content">
+                <h3>${escapeHTML(item.title)}</h3>
+                <p>${escapeHTML(item.description)}</p>
+              </div>
+            `;
+            container.appendChild(card);
+          });
+        }
+
+        if (data.faqTitle) document.getElementById('faq-title').textContent = data.faqTitle;
+
+        if (Array.isArray(data.faq)) {
+          const container = document.getElementById('faq-container');
+          container.innerHTML = '';
+          data.faq.forEach(item => {
+            const faqItem = document.createElement('div');
+            faqItem.className = 'faq-item';
+            faqItem.innerHTML = `
+              <h3>Q. ${escapeHTML(item.question)}</h3>
+              <p>${escapeHTML(item.answer)}</p>
+            `;
+            container.appendChild(faqItem);
+          });
+        }
+
+        if (data.contact) {
+          if (data.contact.title) document.getElementById('contact-title').textContent = data.contact.title;
+          if (data.contact.description) document.getElementById('contact-description').textContent = data.contact.description;
+        }
+
+        if (data.footer) document.getElementById('footer-copyright').textContent = data.footer;
+      }
+
+      function renderFallbackContent() {
+        document.getElementById('hero-kicker').textContent = "城市美味指南 2026";
+        document.getElementById('hero-title').textContent = "探索在地巷弄的美食地圖";
+        document.getElementById('hero-subtitle').textContent = "請透過 HTTP Server 開啟網頁以完整讀取 JSON 資料。";
+      }
+
+      function escapeHTML(str) {
+        if (!str) return '';
+        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+      }
+    });
+  </script>
+</body>
+</html>

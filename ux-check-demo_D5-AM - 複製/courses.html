@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>精選美食地圖 | Foodie Map</title>
+  <style>
+    :root {
+      --bg-color: #141113;
+      --surface-color: #1e181c;
+      --surface-card: #282025;
+      --surface-hover: #342a30;
+      --primary-color: #d35400;
+      --primary-hover: #e67e22;
+      --primary-light: #f39c12;
+      --text-main: #f5f2f4;
+      --text-muted: #b3a7b0;
+      --border-color: #3e2e37;
+      --max-width: 1100px;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .container {
+      width: 100%;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    header {
+      background-color: rgba(20, 17, 19, 0.95);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 70px;
+    }
+
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .logo span { color: var(--primary-light); }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 2rem;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .nav-links a.active {
+      color: var(--text-main);
+      border-bottom: 2px solid var(--primary-color);
+      padding-bottom: 4px;
+    }
+
+    .page-header {
+      padding: 4rem 0 2rem;
+      text-align: center;
+      background: radial-gradient(circle at 50% 0%, #4a2108 0%, var(--bg-color) 70%);
+    }
+
+    .page-header h1 {
+      font-size: 2.25rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .page-header p {
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .filter-bar {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      margin: 2rem 0 3rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 0.5rem 1.25rem;
+      border-radius: 50px;
+      background-color: var(--surface-color);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover, .filter-btn.active {
+      background-color: var(--primary-color);
+      color: var(--text-main);
+      border-color: var(--primary-color);
+    }
+
+    .food-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2rem;
+      margin-bottom: 5rem;
+    }
+
+    .food-card {
+      background-color: var(--surface-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .food-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--primary-light);
+    }
+
+    .food-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .food-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .food-tag {
+      align-self: flex-start;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      background-color: rgba(243, 156, 18, 0.15);
+      color: var(--primary-light);
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+
+    .food-title {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .food-desc {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.25rem;
+      flex-grow: 1;
+    }
+
+    .food-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .rating {
+      color: var(--primary-light);
+      font-weight: bold;
+    }
+
+    footer {
+      background-color: #0d0a0c;
+      padding: 2.5rem 0;
+      margin-top: auto;
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <nav>
+        <a href="index.html" class="logo">Foodie <span>Map</span></a>
+        <ul class="nav-links">
+          <li><a href="index.html">首頁</a></li>
+          <li><a href="courses.html" class="active">美食地圖</a></li>
+          <li><a href="contact.html">推薦私房美食</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="page-header">
+      <h1>探索城市精選美食地圖</h1>
+      <p>由在地饕客實測，精選最具特色的小吃、質感餐廳與深夜美食。</p>
+    </div>
+
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterCategory('all')">全部分類</button>
+      <button class="filter-btn" onclick="filterCategory('小吃')">道地小吃</button>
+      <button class="filter-btn" onclick="filterCategory('餐廳')">質感餐廳</button>
+      <button class="filter-btn" onclick="filterCategory('深夜')">深夜食堂</button>
+      <button class="filter-btn" onclick="filterCategory('甜點')">特色甜點</button>
+    </div>
+
+    <div class="food-grid" id="food-grid"></div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>© 2026 美食地圖 Foodie Map | 探索城市每一個美味角落</p>
+    </div>
+  </footer>
+
+  <script>
+    const foodItems = [
+      {
+        title: "老街手工胡椒餅",
+        category: "小吃",
+        desc: "炭火烘烤，外皮香酥脆口，內餡扎實多汁且帶有濃郁黑胡椒香氣。",
+        image: "https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?auto=format&fit=crop&w=800&q=80",
+        location: "捷運龍山寺站",
+        rating: "★ 4.8 (1,200+ 評價)"
+      },
+      {
+        title: "赤峰街質感老宅咖啡",
+        category: "甜點",
+        desc: "主打手沖單品咖啡與每日限量的肉桂捲，氣氛悠閒適合放空與閱讀。",
+        image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=800&q=80",
+        location: "捷運中山站",
+        rating: "★ 4.7 (850+ 評價)"
+      },
+      {
+        title: "巷弄日式拉麵專門店",
+        category: "餐廳",
+        desc: "濃郁豚骨湯頭與自家製細麵，搭配肥瘦適中的炙燒叉燒，令人回味無窮。",
+        image: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=800&q=80",
+        location: "捷運東門站",
+        rating: "★ 4.9 (2,100+ 評價)"
+      },
+      {
+        title: "深夜食堂炭火串燒",
+        category: "深夜",
+        desc: "營業至凌晨兩點，獨門醬汁搭配生啤酒，是下班聚會與宵夜的完美選擇。",
+        image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80",
+        location: "捷運忠孝敦化站",
+        rating: "★ 4.6 (920+ 評價)"
+      },
+      {
+        title: "傳統古早味花生冰刨冰",
+        category: "甜點",
+        desc: "綿密刨冰淋上香濃花生醬與手作芋圓，高CP值的夏天消暑聖品。",
+        image: "https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=800&q=80",
+        location: "捷運公館站",
+        rating: "★ 4.8 (1,500+ 評價)"
+      },
+      {
+        title: "原汁原味紅燒牛肉麵",
+        category: "小吃",
+        desc: "慢火熬煮數小時的牛骨高湯，牛肉軟嫩入味，配上特製炒酸菜一絕。",
+        image: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?auto=format&fit=crop&w=800&q=80",
+        location: "捷運西門站",
+        rating: "★ 4.7 (3,100+ 評價)"
+      }
+    ];
+
+    function renderCards(items) {
+      const grid = document.getElementById('food-grid');
+      grid.innerHTML = '';
+      items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'food-card';
+        card.innerHTML = `
+          <img class="food-image" src="${item.image}" alt="${item.title}">
+          <div class="food-body">
+            <span class="food-tag">${item.category}</span>
+            <h3 class="food-title">${item.title}</h3>
+            <p class="food-desc">${item.desc}</p>
+            <div class="food-meta">
+              <span>📍 ${item.location}</span>
+              <span class="rating">${item.rating}</span>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function filterCategory(category) {
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      if (category === 'all') {
+        renderCards(foodItems);
+      } else {
+        const filtered = foodItems.filter(item => item.category === category);
+        renderCards(filtered);
+      }
+    }
+
+    renderCards(foodItems);
+  </script>
+</body>
+</html>
